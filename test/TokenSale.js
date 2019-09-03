@@ -33,7 +33,7 @@ contract("TokenSale", accounts => {
 				assert.equal(receipt.logs[0].args._from, accounts[0], "Correct sender");
 				assert.equal(receipt.logs[0].args._to, TokenSaleInstance.address, "Correct receiver");
 				assert.equal(receipt.logs[0].args._value, tokensOffering, "Correct value transfered");
-				return TokenInstance.myBalance({ from: TokenSaleInstance.address });
+				return TokenInstance.balanceOf(TokenSaleInstance.address);
 			}).then(balance => {
 				assert.equal(balance.toNumber(), tokensOffering, "Correct number of tokens transfered");		
 			});
@@ -67,10 +67,10 @@ contract("TokenSale", accounts => {
 				return TokenSaleInstance.tokensSold();
 			}).then(tokensSold => {
 				assert.equal(tokensSold.toNumber(), amountOfTokens, "correct total of tokens sold");
-				return TokenInstance.myBalance({ from: accounts[1] });
+				return TokenInstance.balanceOf(accounts[1]);
 			}).then(balance => {
 				assert.equal(balance.toNumber(), amountOfTokens, "correct amount of tokens transfered");
-				return TokenInstance.myBalance({ from: TokenSaleInstance.address });
+				return TokenInstance.balanceOf(TokenSaleInstance.address);
 			}).then(balance => {
 				assert.equal(balance.toNumber(), tokensOffering - amountOfTokens, "Correct amount of tokens remaining");
 			});
@@ -95,10 +95,10 @@ contract("TokenSale", accounts => {
 				assert.equal(receipt.logs.length, 1, "one event triggered");
 				assert.equal(receipt.logs[0].event, "EndSale", "'EndSale' type event");
 				assert.equal(receipt.logs[0].args._admin, accounts[0], "admin ended sales");
-				return TokenInstance.myBalance({ from: accounts[0] });
+				return TokenInstance.balanceOf(accounts[0]);
 			}).then(balance => {
 				assert.equal(balance.toNumber(), totalSupply - amountOfTokens, "remaing tokens sent back to admin");
-				return TokenInstance.myBalance({ from: TokenSaleInstance.address });
+				return TokenInstance.balanceOf(TokenSaleInstance.address);
 			}).then(balance => {
 				assert.equal(balance.toNumber(), 0, "contract doesn't have any tokens");
 

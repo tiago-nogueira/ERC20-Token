@@ -1,4 +1,4 @@
-pragma solidity 0.5.0;
+pragma solidity 0.5.8;
 
 import "./Token.sol";
 
@@ -35,7 +35,7 @@ contract TokenSale {
 		require(msg.value == multiply(_amountOfTokens, tokenPrice));
 
 		// Require there is enough tokens to sell
-		require(tokenContract.myBalance() - tokensSold >= _amountOfTokens);
+		require(tokenContract.balanceOf(address(this)) - tokensSold >= _amountOfTokens);
 
 		// Require that transfer is successful
 		require(tokenContract.transfer(msg.sender, _amountOfTokens));
@@ -53,7 +53,7 @@ contract TokenSale {
 		require(msg.sender == admin);
 
 		// Require remaining tokens are transfered back to admin
-		require(tokenContract.transfer(admin, tokenContract.myBalance()));
+		require(tokenContract.transfer(admin, tokenContract.balanceOf(address(this))));
 
 		// Emit EndSale event
 		emit EndSale(msg.sender);

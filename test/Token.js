@@ -24,19 +24,18 @@ contract("Token", accounts => {
 			return tokenInstance.totalSupply();
 		}).then(totalSupply => {
 			assert.equal(totalSupply.toNumber(), 1000000, "Correct total supply");
-			return tokenInstance.myBalance({ from: accounts[0] });
+			return tokenInstance.balanceOf(accounts[0]);
 		}).then(adminBalance => {
 			assert.equal(adminBalance.toNumber(), 1000000, "Inicial supply allocated to admins' account");
 		});
 	});
 
-	it("tries to access the private variable 'balanceOf'", () => {
+	it("tries to access the private variable 'balances'", () => {
 		return Token.deployed().then(instance => {
 			tokenInstance = instance;
-			return tokenInstance.balanceOf(accounts[0]);
+			return tokenInstance.balances(accounts[0]);
 		}).then(assert.fail).catch(error => {
-			assert(error.name == 'TypeError', "'balanceOf' must be private");
-		});
+			assert(error.name == 'TypeError', "'balanceOf' private");	});
 	});
 
 	it("tries to access the private variable 'approvedTransfers'", () => {
@@ -65,10 +64,10 @@ contract("Token", accounts => {
 			assert.equal(receipt.logs[0].args._from, accounts[0], "Correct sender");
 			assert.equal(receipt.logs[0].args._to, accounts[1], "Correct receiver");
 			assert.equal(receipt.logs[0].args._value, 250000, "Correct value transfered");
-			return tokenInstance.myBalance({ from: accounts[1] });
+			return tokenInstance.balanceOf(accounts[1]);
 		}).then(balance => {
 			assert.equal(balance.toNumber(), 250000, "tokens received");
-			return tokenInstance.myBalance({ from: accounts[0] });
+			return tokenInstance.balanceOf(accounts[0]);
 		}).then(balance => {
 			assert.equal(balance.toNumber(), 750000, "tokens deducted");
 		});
@@ -85,7 +84,7 @@ contract("Token", accounts => {
 			assert.equal(receipt.logs.length, 1, "triggers one event");
 			assert.equal(receipt.logs[0].event, "Approval", "'Approval' event");
 			assert.equal(receipt.logs[0].args._owner, accounts[0], "Correct message sender");
-			assert.equal(receipt.logs[0].args._spender, accounts[1], "Correct spender");
+			assert.equal(receipt.logs[0].args._spender, accounts[1], "Correct recipient");
 			assert.equal(receipt.logs[0].args._value, 1000, "Correct amount");
 			return tokenInstance.allowance(accounts[0], accounts[1]);
 		}).then(allowance => {
@@ -100,14 +99,14 @@ contract("Token", accounts => {
 			return tokenInstance.transferFrom.call(accounts[0], accounts[1], 100000);
 		}).then(assert.fail).catch(error => {
 			assert(error.message.indexOf('revert') >= 0, "error message must contain 'revert'");
-			return tokenInstance.transferFrom.call(accounts[0], accounts[1], 300, { from: accounts[1] });
+			return tokenInstance.transferFrom.call(accounts[0], accounts[9], 300, { from: accounts[1] });
 		}).then(success => {
-			return tokenInstance.transferFrom(accounts[0], accounts[1], 300, { from: accounts[1] });
+			return tokenInstance.transferFrom(accounts[0], accounts[9], 300, { from: accounts[1] });
 		}).then(receipt => {
 			assert.equal(receipt.logs.length, 1, "triggers one event");
 			assert.equal(receipt.logs[0].event, "Transfer", "'Transfer' event");
 			assert.equal(receipt.logs[0].args._from, accounts[0], "Correct message sender");
-			assert.equal(receipt.logs[0].args._to, accounts[1], "Correct spender");
+			assert.equal(receipt.logs[0].args._to, accounts[9], "Correct recipient");
 			assert.equal(receipt.logs[0].args._value, 300, "Correct amount");
 			return tokenInstance.allowance(accounts[0], accounts[1]);
 		}).then(allowance => {
@@ -136,10 +135,10 @@ contract("Token", accounts => {
 			return tokenInstance.allowance(accounts[2], accounts[3], { from: accounts[2] });
 		}).then(allowance => {
 			assert.equal(allowance.toNumber(), 500, "Correct allowance");
-			return tokenInstance.myBalance({ from: accounts[2] });
+			return tokenInstance.balanceOf(accounts[2]);
 		}).then(balance => {
 			assert.equal(balance.toNumber(), 0, "Correct balance");
-			return tokenInstance.myBalance({ from: accounts[3] });
+			return tokenInstance.balanceOf(accounts[3]);
 		}).then(balance => {
 			assert.equal(balance.toNumber(), 0, "Correct balance");
 		});
